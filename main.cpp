@@ -3,6 +3,7 @@
 #include <optional>
 #include "Database.h"
 #include "CommandParser.h"
+#include "Command.h"
 
 int main() {
     Database db;
@@ -25,15 +26,14 @@ int main() {
             // Parse command
             auto cmdOpt = parser.parse(line);
 
-            if (!cmdOpt) {
+            if (!cmdOpt.has_value()) {
                 std::cout << "Invalid command\n";
                 continue;
             }
 
-            const Command& cmd = *cmdOpt;
+            const Command& cmd {cmdOpt.value()};
 
-            // Exit command handled early
-            if (cmd.type == CommandType::Exit) {
+            if (cmd.getType() == CommandType::EXIT) {
                 std::cout << "Shutting down MiniDB...\n";
                 break;
             }
