@@ -1,3 +1,9 @@
+#pragma once
+
+#include <string>
+#include <variant>
+#include <optional>
+
 enum CommandType
 {
     SET,

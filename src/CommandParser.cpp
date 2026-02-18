@@ -1,16 +1,17 @@
-#include <CommandParser.h>
-#include <Command.h>
+#include "../inc/CommandParser.h"
+#include "../inc/Command.h"
 #include <optional>
 #include <string>
 #include <sstream>
 #include <variant>
+#include <algorithm>
 
 // Helper function to detect and convert value type
 static std::variant<std::string, int, double> parseValue(const std::string &value)
 {
     try
     {
-        // Try to parse as integer first
+        // parse integer first
         size_t pos;
         int intVal = std::stoi(value, &pos);
         if (pos == value.length())
@@ -24,7 +25,7 @@ static std::variant<std::string, int, double> parseValue(const std::string &valu
 
     try
     {
-        // Try to parse as double
+        // parse as double
         size_t pos;
         double doubleVal = std::stod(value, &pos);
         if (pos == value.length())
@@ -42,9 +43,12 @@ static std::variant<std::string, int, double> parseValue(const std::string &valu
 
 std::optional<Command> CommandParser::parse(const std::string &line)
 {
-    std::istringstream iss(line);
+    std::istringstream iss(line);   
     std::string cmdStr;
     iss >> cmdStr;
+
+    std::transform(cmdStr.begin(), cmdStr.end(), cmdStr.begin(),
+                   [](unsigned char c){ return std::toupper(c); });
 
     Command cmd;
 

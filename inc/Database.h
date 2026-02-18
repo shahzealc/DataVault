@@ -1,5 +1,10 @@
+#pragma once
+
 #include <variant>
 #include <unordered_map>
+#include <string>
+#include <optional>
+#include "Command.h"
 
 class Database
 {

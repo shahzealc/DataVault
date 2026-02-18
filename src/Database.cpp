@@ -1,5 +1,5 @@
-#include "inc/Database.h"
-#include "inc/Command.h"
+#include "Database.h"
+#include "Command.h"
 #include <optional>
 #include <string>
 #include <stdexcept>
@@ -31,6 +31,8 @@ std::optional<std::string> Database::execute(const Command &cmd)
     case CommandType::CLEAR:
         data.clear();
         return "OK";
+    case CommandType::HELP:
+        return "Commands: SET key value | GET key | DEL key | COUNT | CLEAR | HELP | EXIT";
     default:
         throw std::runtime_error("Unsupported command");
     }
