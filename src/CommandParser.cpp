@@ -1,5 +1,5 @@
-#include "../inc/CommandParser.h"
-#include "../inc/Command.h"
+#include "CommandParser.h"
+#include "Command.h"
 #include <optional>
 #include <string>
 #include <sstream>
