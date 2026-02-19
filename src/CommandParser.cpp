@@ -47,6 +47,10 @@ std::optional<Command> CommandParser::parse(const std::string &line)
     {
         cmd.setType(CommandType::CLEAR);
     }
+    else if (cmdStr == "LIST")
+    {
+        cmd.setType(CommandType::LIST);
+    }
     else if (cmdStr == "HELP")
     {
         cmd.setType(CommandType::HELP);

@@ -12,6 +12,7 @@ enum CommandType
     COUNT,
     CLEAR,
     HELP,
+    LIST,
     EXIT,
 };
 

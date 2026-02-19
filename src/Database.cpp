@@ -73,6 +73,22 @@ Status Database::execute(const Command &cmd)
         data.erase(cmd.getKey()) == 1 ? Status::Ok("Deleted") : Status::Error("Key not found");
     case CommandType::COUNT:
         return Status::Ok(std::to_string(data.size()));
+    case CommandType::LIST:
+    {
+        std::string result;
+        for (const auto &[key, value] : data)
+        {
+            result += key + "=";
+            if (std::holds_alternative<std::string>(value))
+                result += std::get<std::string>(value);
+            else if (std::holds_alternative<int>(value))
+                result += std::to_string(std::get<int>(value));
+            else if (std::holds_alternative<double>(value))
+                result += std::to_string(std::get<double>(value));
+            result += "\n";
+        }
+        return Status::Ok(result.empty() ? "No entries" : result);
+    }
     case CommandType::CLEAR:
         data.clear();
         return Status::Ok("Database cleared");
