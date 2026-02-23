@@ -41,7 +41,6 @@ int main() {
             // Execute command
             auto result = db.execute(cmd);
 
-            // Print result
             std::cout << (result.success ? "Success: " : "Error: ") << result.message << "\n";
 
         } catch (const std::exception& ex) {

@@ -25,7 +25,7 @@ public:
 
 private:
     std::fstream datastore;
-    std::unordered_map<std::string, std::variant<std::string, int, double>> data;
+    std::unordered_map<std::string, std::variant<std::string, int, double, bool>> data;
 
     void saveToFile();
     void loadFromFile();

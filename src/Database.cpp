@@ -67,6 +67,8 @@ Status Database::execute(const Command &cmd)
                 return Status::Ok(std::to_string(std::get<int>(val)));
             else if (std::holds_alternative<double>(val))
                 return Status::Ok(std::to_string(std::get<double>(val)));
+            else if (std::holds_alternative<bool>(val))
+                return Status::Ok(std::get<bool>(val) ? "true" : "false");
         }
         return Status::Error("Key not found");
     case CommandType::DEL:
@@ -75,16 +77,18 @@ Status Database::execute(const Command &cmd)
         return Status::Ok(std::to_string(data.size()));
     case CommandType::LIST:
     {
-        std::string result;
+        std::string result = "\n";
         for (const auto &[key, value] : data)
         {
-            result += key + "=";
+            result += key + " = ";
             if (std::holds_alternative<std::string>(value))
                 result += std::get<std::string>(value);
             else if (std::holds_alternative<int>(value))
                 result += std::to_string(std::get<int>(value));
             else if (std::holds_alternative<double>(value))
                 result += std::to_string(std::get<double>(value));
+            else if (std::holds_alternative<bool>(value))
+                result += std::get<bool>(value) ? "true" : "false";
             result += "\n";
         }
         return Status::Ok(result.empty() ? "No entries" : result);
