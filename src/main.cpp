@@ -9,7 +9,7 @@ int main() {
     Database db;
     CommandParser parser;
 
-    std::cout << "MiniDB started. Type HELP for commands.\n";
+    std::cout << "DataVault started. Type HELP for commands.\n";
 
     std::string line;
 
