@@ -93,6 +93,20 @@ Status Database::execute(const Command &cmd)
         }
         return Status::Ok(result.empty() ? "No entries" : result);
     }
+    case CommandType::TYPE:
+        if (data.find(cmd.getKey()) != data.end())
+        {
+            const auto &val = data[cmd.getKey()];
+            if (std::holds_alternative<std::string>(val))
+                return Status::Ok("string");
+            else if (std::holds_alternative<int>(val))
+                return Status::Ok("int");
+            else if (std::holds_alternative<double>(val))
+                return Status::Ok("double");
+            else if (std::holds_alternative<bool>(val))
+                return Status::Ok("bool");
+        }
+        return Status::Error("Key not found");
     case CommandType::CLEAR:
         data.clear();
         return Status::Ok("Database cleared");

@@ -51,6 +51,13 @@ std::optional<Command> CommandParser::parse(const std::string &line)
     {
         cmd.setType(CommandType::LIST);
     }
+    else if(cmdStr == "TYPE")
+    {
+        cmd.setType(CommandType::TYPE);
+        std::string key;
+        iss >> key;
+        cmd.setKey(key);
+    }
     else if (cmdStr == "HELP")
     {
         cmd.setType(CommandType::HELP);
