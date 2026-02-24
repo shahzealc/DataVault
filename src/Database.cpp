@@ -42,6 +42,165 @@ void Database::loadFromFile()
     }
 }
 
+std::string Database::valueToString(const std::variant<std::string, int, double, bool> &val)
+{
+    if (std::holds_alternative<std::string>(val))
+        return std::get<std::string>(val);
+    else if (std::holds_alternative<int>(val))
+        return std::to_string(std::get<int>(val));
+    else if (std::holds_alternative<double>(val))
+        return std::to_string(std::get<double>(val));
+    else if (std::holds_alternative<bool>(val))
+        return std::get<bool>(val) ? "true" : "false";
+    return "";
+}
+
+Status Database::handleSet(const Command &cmd)
+{
+    data[cmd.getKey()] = cmd.getValue();
+    return Status::Ok("Value set");
+}
+
+Status Database::handleGet(const Command &cmd)
+{
+    if (data.find(cmd.getKey()) != data.end())
+    {
+        return Status::Ok(valueToString(data[cmd.getKey()]));
+    }
+    return Status::Error("Key not found");
+}
+
+Status Database::handleDel(const Command &cmd)
+{
+    if (data.erase(cmd.getKey()) == 1)
+        return Status::Ok("Deleted");
+    return Status::Error("Key not found");
+}
+
+Status Database::handleCount(const Command &cmd)
+{
+    return Status::Ok(std::to_string(data.size()));
+}
+
+Status Database::handleList(const Command &cmd)
+{
+    std::string result = "\n";
+    for (const auto &[key, value] : data)
+    {
+        result += key + " = " + valueToString(value) + "\n";
+    }
+    return Status::Ok(result.empty() ? "No entries" : result);
+}
+
+Status Database::handleType(const Command &cmd)
+{
+    if (data.find(cmd.getKey()) != data.end())
+    {
+        const auto &val = data[cmd.getKey()];
+        if (std::holds_alternative<std::string>(val))
+            return Status::Ok("string");
+        else if (std::holds_alternative<int>(val))
+            return Status::Ok("int");
+        else if (std::holds_alternative<double>(val))
+            return Status::Ok("double");
+        else if (std::holds_alternative<bool>(val))
+            return Status::Ok("bool");
+    }
+    return Status::Error("Key not found");
+}
+
+Status Database::handleExists(const Command &cmd)
+{
+    return data.find(cmd.getKey()) != data.end() ? Status::Ok("true") : Status::Ok("false");
+}
+
+Status Database::handleSearch(const Command &cmd)
+{
+    std::string result;
+    for (const auto &[key, value] : data)
+    {
+        std::string valStr = valueToString(value);
+        if (valStr.find(cmd.getKey()) != std::string::npos)
+            result += "\n" + key + " = " + valStr;
+    }
+    return Status::Ok(result.empty() ? "No matches" : result);
+}
+
+Status Database::handleIncr(const Command &cmd)
+{
+    if (data.find(cmd.getKey()) != data.end())
+    {
+        auto &val = data[cmd.getKey()];
+        if (std::holds_alternative<int>(val))
+        {
+            val = std::get<int>(val) + 1;
+            return Status::Ok("Value incremented");
+        }
+        return Status::Error("Value is not an integer");
+    }
+    data[cmd.getKey()] = 1;
+    return Status::Ok("Key created with value 1");
+}
+
+Status Database::handleDecr(const Command &cmd)
+{
+    if (data.find(cmd.getKey()) != data.end())
+    {
+        auto &val = data[cmd.getKey()];
+        if (std::holds_alternative<int>(val))
+        {
+            val = std::get<int>(val) - 1;
+            return Status::Ok("Value decremented");
+        }
+        return Status::Error("Value is not an integer");
+    }
+    data[cmd.getKey()] = -1;
+    return Status::Ok("Key created with value -1");
+}
+
+Status Database::handleIncrBy(const Command &cmd)
+{
+    if (data.find(cmd.getKey()) != data.end())
+    {
+        auto &val = data[cmd.getKey()];
+        if (std::holds_alternative<int>(val))
+        {
+            val = std::get<int>(val) + std::get<int>(cmd.getValue());
+            return Status::Ok("Value incremented");
+        }
+        return Status::Error("Value is not an integer");
+    }
+    data[cmd.getKey()] = std::get<int>(cmd.getValue());
+    return Status::Ok("Key created with value " + std::to_string(std::get<int>(cmd.getValue())));
+}
+
+Status Database::handleDecrBy(const Command &cmd)
+{
+    if (data.find(cmd.getKey()) != data.end())
+    {
+        auto &val = data[cmd.getKey()];
+        if (std::holds_alternative<int>(val))
+        {
+            val = std::get<int>(val) - std::get<int>(cmd.getValue());
+            return Status::Ok("Value decremented");
+        }
+        return Status::Error("Value is not an integer");
+    }
+    data[cmd.getKey()] = -std::get<int>(cmd.getValue());
+    return Status::Ok("Key created with value " + std::to_string(-std::get<int>(cmd.getValue())));
+}
+
+Status Database::handleClear(const Command &cmd)
+{
+    data.clear();
+    return Status::Ok("Database cleared");
+}
+
+Status Database::handleHelp(const Command &cmd)
+{
+    return Status::Ok("Commands: SET key value | GET key | DEL key | COUNT | LIST | TYPE key | EXISTS key | CLEAR | SEARCH key | INCR key | DECR key | INCRBY key value | DECRBY key value | HELP | EXIT");
+}
+
 Status Database::execute(const Command &cmd)
 {
     static int commandCount = 0;
@@ -55,79 +214,33 @@ Status Database::execute(const Command &cmd)
     switch (cmd.getType())
     {
     case CommandType::SET:
-        data[cmd.getKey()] = cmd.getValue();
-        return Status::Ok("Value set");
+        return handleSet(cmd);
     case CommandType::GET:
-        if (data.find(cmd.getKey()) != data.end())
-        {
-            const auto &val = data[cmd.getKey()];
-            if (std::holds_alternative<std::string>(val))
-                return Status::Ok(std::get<std::string>(val));
-            else if (std::holds_alternative<int>(val))
-                return Status::Ok(std::to_string(std::get<int>(val)));
-            else if (std::holds_alternative<double>(val))
-                return Status::Ok(std::to_string(std::get<double>(val)));
-            else if (std::holds_alternative<bool>(val))
-                return Status::Ok(std::get<bool>(val) ? "true" : "false");
-        }
-        return Status::Error("Key not found");
+        return handleGet(cmd);
     case CommandType::DEL:
-        data.erase(cmd.getKey()) == 1 ? Status::Ok("Deleted") : Status::Error("Key not found");
+        return handleDel(cmd);
     case CommandType::COUNT:
-        return Status::Ok(std::to_string(data.size()));
+        return handleCount(cmd);
     case CommandType::LIST:
-    {
-        std::string result = "\n";
-        for (const auto &[key, value] : data)
-        {
-            result += key + " = ";
-            if (std::holds_alternative<std::string>(value))
-                result += std::get<std::string>(value);
-            else if (std::holds_alternative<int>(value))
-                result += std::to_string(std::get<int>(value));
-            else if (std::holds_alternative<double>(value))
-                result += std::to_string(std::get<double>(value));
-            else if (std::holds_alternative<bool>(value))
-                result += std::get<bool>(value) ? "true" : "false";
-            result += "\n";
-        }
-        return Status::Ok(result.empty() ? "No entries" : result);
-    }
+        return handleList(cmd);
     case CommandType::TYPE:
-        if (data.find(cmd.getKey()) != data.end())
-        {
-            const auto &val = data[cmd.getKey()];
-            if (std::holds_alternative<std::string>(val))
-                return Status::Ok("string");
-            else if (std::holds_alternative<int>(val))
-                return Status::Ok("int");
-            else if (std::holds_alternative<double>(val))
-                return Status::Ok("double");
-            else if (std::holds_alternative<bool>(val))
-                return Status::Ok("bool");
-        }
-        return Status::Error("Key not found");
+        return handleType(cmd);
     case CommandType::EXISTS:
-        return data.find(cmd.getKey()) != data.end() ? Status::Ok("true") : Status::Ok("false");
+        return handleExists(cmd);
     case CommandType::SEARCH:
-    {
-        std::string result;
-        for (const auto &[key, value] : data)
-        {
-            if (std::holds_alternative<std::string>(value) && std::get<std::string>(value).find(cmd.getKey()) != std::string::npos)
-                result += "\n" + key + " = " + std::get<std::string>(value);
-            else if (std::holds_alternative<int>(value) && std::to_string(std::get<int>(value)).find(cmd.getKey()) != std::string::npos)
-                result += "\n" + key + " = " + std::to_string(std::get<int>(value));
-            else if (std::holds_alternative<double>(value) && std::to_string(std::get<double>(value)).find(cmd.getKey()) != std::string::npos)
-                result += "\n" + key + " = " + std::to_string(std::get<double>(value));
-        }
-        return Status::Ok(result.empty() ? "No matches" : result);
-    }
+        return handleSearch(cmd);
+    case CommandType::INCR:
+        return handleIncr(cmd);
+    case CommandType::DECR:
+        return handleDecr(cmd);
+    case CommandType::INCRBY:
+        return handleIncrBy(cmd);
+    case CommandType::DECRBY:
+        return handleDecrBy(cmd);
     case CommandType::CLEAR:
-        data.clear();
-        return Status::Ok("Database cleared");
+        return handleClear(cmd);
     case CommandType::HELP:
-        return Status::Ok("Commands: SET key value | GET key | DEL key | COUNT | LIST | TYPE key | EXISTS key | CLEAR | SEARCH key | HELP | EXIT");
+        return handleHelp(cmd);
     default:
         throw std::runtime_error("Unsupported command");
     }

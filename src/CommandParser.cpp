@@ -19,26 +19,15 @@ std::optional<Command> CommandParser::parse(const std::string &line)
 
     if (cmdStr == "SET")
     {
-        cmd.setType(CommandType::SET);
-        std::string key, value;
-        iss >> key;
-        std::getline(iss, value);
-        cmd.setKey(key);
-        cmd.setValue(parseValue(value));
+        parseSet(iss, cmd);
     }
     else if (cmdStr == "GET")
     {
-        cmd.setType(CommandType::GET);
-        std::string key;
-        iss >> key;
-        cmd.setKey(key);
+        parseGet(iss, cmd);
     }
     else if (cmdStr == "DEL")
     {
-        cmd.setType(CommandType::DEL);
-        std::string key;
-        iss >> key;
-        cmd.setKey(key);
+        parseDel(iss, cmd);
     }
     else if (cmdStr == "COUNT")
     {
@@ -52,26 +41,33 @@ std::optional<Command> CommandParser::parse(const std::string &line)
     {
         cmd.setType(CommandType::LIST);
     }
-    else if(cmdStr == "TYPE")
+    else if (cmdStr == "TYPE")
     {
-        cmd.setType(CommandType::TYPE);
-        std::string key;
-        iss >> key;
-        cmd.setKey(key);
+        parseType(iss, cmd);
     }
-    else if(cmdStr == "EXISTS")
+    else if (cmdStr == "EXISTS")
     {
-        cmd.setType(CommandType::EXISTS);
-        std::string key;
-        iss >> key;
-        cmd.setKey(key);
+        parseExists(iss, cmd);
     }
-    else if(cmdStr == "SEARCH")
+    else if (cmdStr == "SEARCH")
     {
-        cmd.setType(CommandType::SEARCH);
-        std::string key;
-        iss >> key;
-        cmd.setKey(key);
+        parseSearch(iss, cmd);
+    }
+    else if (cmdStr == "INCR")
+    {
+        parseIncr(iss, cmd);
+    }
+    else if (cmdStr == "DECR")
+    {
+        parseDecr(iss, cmd);
+    }
+    else if (cmdStr == "INCRBY")
+    {
+        parseIncrBy(iss, cmd);
+    }
+    else if (cmdStr == "DECRBY")
+    {
+        parseDecrBy(iss, cmd);
     }
     else if (cmdStr == "HELP")
     {
@@ -87,4 +83,90 @@ std::optional<Command> CommandParser::parse(const std::string &line)
     }
 
     return cmd;
+}
+
+void CommandParser::parseSet(std::istringstream &iss, Command &cmd)
+{
+    cmd.setType(CommandType::SET);
+    std::string key, value;
+    iss >> key;
+    std::getline(iss, value);
+    cmd.setKey(key);
+    cmd.setValue(parseValue(value));
+}
+
+void CommandParser::parseGet(std::istringstream &iss, Command &cmd)
+{
+    cmd.setType(CommandType::GET);
+    std::string key;
+    iss >> key;
+    cmd.setKey(key);
+}
+
+void CommandParser::parseDel(std::istringstream &iss, Command &cmd)
+{
+    cmd.setType(CommandType::DEL);
+    std::string key;
+    iss >> key;
+    cmd.setKey(key);
+}
+
+void CommandParser::parseType(std::istringstream &iss, Command &cmd)
+{
+    cmd.setType(CommandType::TYPE);
+    std::string key;
+    iss >> key;
+    cmd.setKey(key);
+}
+
+void CommandParser::parseExists(std::istringstream &iss, Command &cmd)
+{
+    cmd.setType(CommandType::EXISTS);
+    std::string key;
+    iss >> key;
+    cmd.setKey(key);
+}
+
+void CommandParser::parseSearch(std::istringstream &iss, Command &cmd)
+{
+    cmd.setType(CommandType::SEARCH);
+    std::string key;
+    iss >> key;
+    cmd.setKey(key);
+}
+
+void CommandParser::parseIncr(std::istringstream &iss, Command &cmd)
+{
+    cmd.setType(CommandType::INCR);
+    std::string key;
+    iss >> key;
+    cmd.setKey(key);
+}
+
+void CommandParser::parseDecr(std::istringstream &iss, Command &cmd)
+{
+    cmd.setType(CommandType::DECR);
+    std::string key;
+    iss >> key;
+    cmd.setKey(key);
+}
+
+void CommandParser::parseIncrBy(std::istringstream &iss, Command &cmd)
+{
+    cmd.setType(CommandType::INCRBY);
+    std::string key;
+    int amount;
+    iss >> key >> amount;
+    cmd.setKey(key);
+    cmd.setValue(amount);
+}
+
+void CommandParser::parseDecrBy(std::istringstream &iss, Command &cmd)
+{
+    cmd.setType(CommandType::DECRBY);
+    std::string key;
+    int amount;
+    iss >> key >> amount;
+    cmd.setKey(key);
+    cmd.setValue(amount);
 }

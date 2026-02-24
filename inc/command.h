@@ -17,6 +17,10 @@ enum CommandType
     TYPE,
     EXISTS,
     SEARCH,
+    INCR,
+    DECR,
+    INCRBY,
+    DECRBY,
     EXIT,
 };
 

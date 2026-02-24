@@ -9,6 +9,19 @@ class CommandParser
 {
 public:
     std::optional<Command> parse(const std::string &line);
+
+private:
+    // Command parsing methods
+    void parseSet(std::istringstream &iss, Command &cmd);
+    void parseGet(std::istringstream &iss, Command &cmd);
+    void parseDel(std::istringstream &iss, Command &cmd);
+    void parseType(std::istringstream &iss, Command &cmd);
+    void parseExists(std::istringstream &iss, Command &cmd);
+    void parseSearch(std::istringstream &iss, Command &cmd);
+    void parseIncr(std::istringstream &iss, Command &cmd);
+    void parseDecr(std::istringstream &iss, Command &cmd);
+    void parseIncrBy(std::istringstream &iss, Command &cmd);
+    void parseDecrBy(std::istringstream &iss, Command &cmd);
 };
 
 // Helper function to detect and convert value type
