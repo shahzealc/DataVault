@@ -190,6 +190,22 @@ Status Database::handleDecrBy(const Command &cmd)
     return Status::Ok("Key created with value " + std::to_string(-std::get<int>(cmd.getValue())));
 }
 
+Status Database::handleAppend(const Command &cmd)
+{
+    if (data.find(cmd.getKey()) != data.end())
+    {
+        auto &val = data[cmd.getKey()];
+        if (std::holds_alternative<std::string>(val))
+        {
+            val = std::get<std::string>(val) + valueToString(cmd.getValue());
+            return Status::Ok("Value appended");
+        }
+        return Status::Error("Value is not a string");
+    }
+    data[cmd.getKey()] = valueToString(cmd.getValue());
+    return Status::Ok("Key created with value " + valueToString(cmd.getValue()));
+}
+
 Status Database::handleClear(const Command &cmd)
 {
     data.clear();
@@ -237,6 +253,8 @@ Status Database::execute(const Command &cmd)
         return handleIncrBy(cmd);
     case CommandType::DECRBY:
         return handleDecrBy(cmd);
+    case CommandType::APPEND:
+        return handleAppend(cmd);
     case CommandType::CLEAR:
         return handleClear(cmd);
     case CommandType::HELP:

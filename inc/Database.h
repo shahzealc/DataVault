@@ -45,6 +45,7 @@ private:
     Status handleDecrBy(const Command &cmd);
     Status handleClear(const Command &cmd);
     Status handleHelp(const Command &cmd);
+    Status handleAppend(const Command &cmd);
     
     // Helper methods
     std::string valueToString(const std::variant<std::string, int, double, bool> &val);

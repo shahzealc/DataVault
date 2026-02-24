@@ -69,6 +69,10 @@ std::optional<Command> CommandParser::parse(const std::string &line)
     {
         parseDecrBy(iss, cmd);
     }
+    else if(cmdStr == "APPEND")
+    {
+        parseAppend(iss, cmd);
+    }
     else if (cmdStr == "HELP")
     {
         cmd.setType(CommandType::HELP);
@@ -169,4 +173,14 @@ void CommandParser::parseDecrBy(std::istringstream &iss, Command &cmd)
     iss >> key >> amount;
     cmd.setKey(key);
     cmd.setValue(amount);
+}
+
+void CommandParser::parseAppend(std::istringstream &iss, Command &cmd)
+{
+    cmd.setType(CommandType::APPEND);
+    std::string key, value;
+    iss >> key;
+    std::getline(iss, value);
+    cmd.setKey(key);
+    cmd.setValue(parseValue(value));
 }
