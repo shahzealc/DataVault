@@ -15,6 +15,8 @@ enum CommandType
     HELP,
     LIST,
     TYPE,
+    EXISTS,
+    SEARCH,
     EXIT,
 };
 

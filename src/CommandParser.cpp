@@ -58,6 +58,20 @@ std::optional<Command> CommandParser::parse(const std::string &line)
         iss >> key;
         cmd.setKey(key);
     }
+    else if(cmdStr == "EXISTS")
+    {
+        cmd.setType(CommandType::EXISTS);
+        std::string key;
+        iss >> key;
+        cmd.setKey(key);
+    }
+    else if(cmdStr == "SEARCH")
+    {
+        cmd.setType(CommandType::SEARCH);
+        std::string key;
+        iss >> key;
+        cmd.setKey(key);
+    }
     else if (cmdStr == "HELP")
     {
         cmd.setType(CommandType::HELP);

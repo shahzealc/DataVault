@@ -107,6 +107,22 @@ Status Database::execute(const Command &cmd)
                 return Status::Ok("bool");
         }
         return Status::Error("Key not found");
+    case CommandType::EXISTS:
+        return data.find(cmd.getKey()) != data.end() ? Status::Ok("true") : Status::Ok("false");
+    case CommandType::SEARCH:
+    {
+        std::string result;
+        for (const auto &[key, value] : data)
+        {
+            if (std::holds_alternative<std::string>(value) && std::get<std::string>(value).find(cmd.getKey()) != std::string::npos)
+                result += "\n" + key + " = " + std::get<std::string>(value);
+            else if (std::holds_alternative<int>(value) && std::to_string(std::get<int>(value)).find(cmd.getKey()) != std::string::npos)
+                result += "\n" + key + " = " + std::to_string(std::get<int>(value));
+            else if (std::holds_alternative<double>(value) && std::to_string(std::get<double>(value)).find(cmd.getKey()) != std::string::npos)
+                result += "\n" + key + " = " + std::to_string(std::get<double>(value));
+        }
+        return Status::Ok(result.empty() ? "No matches" : result);
+    }
     case CommandType::CLEAR:
         data.clear();
         return Status::Ok("Database cleared");
