@@ -127,7 +127,7 @@ Status Database::execute(const Command &cmd)
         data.clear();
         return Status::Ok("Database cleared");
     case CommandType::HELP:
-        return Status::Ok("Commands: SET key value | GET key | DEL key | COUNT | CLEAR | HELP | EXIT");
+        return Status::Ok("Commands: SET key value | GET key | DEL key | COUNT | LIST | TYPE key | EXISTS key | CLEAR | SEARCH key | HELP | EXIT");
     default:
         throw std::runtime_error("Unsupported command");
     }

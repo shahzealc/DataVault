@@ -21,7 +21,8 @@ std::optional<Command> CommandParser::parse(const std::string &line)
     {
         cmd.setType(CommandType::SET);
         std::string key, value;
-        iss >> key >> value;
+        iss >> key;
+        std::getline(iss, value);
         cmd.setKey(key);
         cmd.setValue(parseValue(value));
     }
