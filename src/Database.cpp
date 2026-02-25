@@ -1,5 +1,6 @@
 #include "Database.h"
 #include "Command.h"
+#include "logger.h"
 #include <optional>
 #include <string>
 #include <stdexcept>
@@ -58,6 +59,7 @@ std::string Database::valueToString(const std::variant<std::string, int, double,
 Status Database::handleSet(const Command &cmd)
 {
     data[cmd.getKey()] = cmd.getValue();
+    Logger::getInstance().log("SET " + cmd.getKey() + " = " + valueToString(cmd.getValue()));
     return Status::Ok("Value set");
 }
 
@@ -73,7 +75,10 @@ Status Database::handleGet(const Command &cmd)
 Status Database::handleDel(const Command &cmd)
 {
     if (data.erase(cmd.getKey()) == 1)
+    {
+        Logger::getInstance().log("DEL " + cmd.getKey());
         return Status::Ok("Deleted");
+    }
     return Status::Error("Key not found");
 }
 
@@ -134,11 +139,13 @@ Status Database::handleIncr(const Command &cmd)
         if (std::holds_alternative<int>(val))
         {
             val = std::get<int>(val) + 1;
+            Logger::getInstance().log("INCR " + cmd.getKey());
             return Status::Ok("Value incremented");
         }
         return Status::Error("Value is not an integer");
     }
     data[cmd.getKey()] = 1;
+    Logger::getInstance().log("INCR " + cmd.getKey() + " (created with value 1)");
     return Status::Ok("Key created with value 1");
 }
 
@@ -150,11 +157,13 @@ Status Database::handleDecr(const Command &cmd)
         if (std::holds_alternative<int>(val))
         {
             val = std::get<int>(val) - 1;
+            Logger::getInstance().log("DECR " + cmd.getKey());
             return Status::Ok("Value decremented");
         }
         return Status::Error("Value is not an integer");
     }
     data[cmd.getKey()] = -1;
+    Logger::getInstance().log("DECR " + cmd.getKey() + " (created with value -1)");
     return Status::Ok("Key created with value -1");
 }
 
@@ -166,11 +175,13 @@ Status Database::handleIncrBy(const Command &cmd)
         if (std::holds_alternative<int>(val))
         {
             val = std::get<int>(val) + std::get<int>(cmd.getValue());
+            Logger::getInstance().log("INCRBY " + cmd.getKey() + " by " + std::to_string(std::get<int>(cmd.getValue())));
             return Status::Ok("Value incremented");
         }
         return Status::Error("Value is not an integer");
     }
     data[cmd.getKey()] = std::get<int>(cmd.getValue());
+    Logger::getInstance().log("INCRBY " + cmd.getKey() + " by " + std::to_string(std::get<int>(cmd.getValue())) + " (created with value " + std::to_string(std::get<int>(cmd.getValue())) + ")");
     return Status::Ok("Key created with value " + std::to_string(std::get<int>(cmd.getValue())));
 }
 
@@ -182,11 +193,13 @@ Status Database::handleDecrBy(const Command &cmd)
         if (std::holds_alternative<int>(val))
         {
             val = std::get<int>(val) - std::get<int>(cmd.getValue());
+            Logger::getInstance().log("DECRBY " + cmd.getKey() + " by " + std::to_string(std::get<int>(cmd.getValue())));
             return Status::Ok("Value decremented");
         }
         return Status::Error("Value is not an integer");
     }
     data[cmd.getKey()] = -std::get<int>(cmd.getValue());
+    Logger::getInstance().log("DECRBY " + cmd.getKey() + " by " + std::to_string(std::get<int>(cmd.getValue())) + " (created with value " + std::to_string(-std::get<int>(cmd.getValue())) + ")");
     return Status::Ok("Key created with value " + std::to_string(-std::get<int>(cmd.getValue())));
 }
 
@@ -198,17 +211,20 @@ Status Database::handleAppend(const Command &cmd)
         if (std::holds_alternative<std::string>(val))
         {
             val = std::get<std::string>(val) + valueToString(cmd.getValue());
+            Logger::getInstance().log("APPEND " + cmd.getKey() + " with value " + valueToString(cmd.getValue()));
             return Status::Ok("Value appended");
         }
         return Status::Error("Value is not a string");
     }
     data[cmd.getKey()] = valueToString(cmd.getValue());
+    Logger::getInstance().log("APPEND " + cmd.getKey() + " with value " + valueToString(cmd.getValue()) + " (created with value " + valueToString(cmd.getValue()) + ")");
     return Status::Ok("Key created with value " + valueToString(cmd.getValue()));
 }
 
 Status Database::handleClear(const Command &cmd)
 {
     data.clear();
+    Logger::getInstance().log("CLEAR database");
     return Status::Ok("Database cleared");
 }
 
