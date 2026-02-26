@@ -73,6 +73,10 @@ std::optional<Command> CommandParser::parse(const std::string &line)
     {
         parseAppend(iss, cmd);
     }
+    else if(cmdStr == "RENAME")
+    {
+        parseRename(iss, cmd);
+    }
     else if (cmdStr == "HELP")
     {
         cmd.setType(CommandType::HELP);
@@ -183,4 +187,13 @@ void CommandParser::parseAppend(std::istringstream &iss, Command &cmd)
     std::getline(iss, value);
     cmd.setKey(key);
     cmd.setValue(parseValue(value));
+}
+
+void CommandParser::parseRename(std::istringstream &iss, Command &cmd)
+{
+    cmd.setType(CommandType::RENAME);
+    std::string oldKey, newKey;
+    iss >> oldKey >> newKey;
+    cmd.setKey(oldKey);
+    cmd.setValue(newKey);
 }

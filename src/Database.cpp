@@ -221,6 +221,20 @@ Status Database::handleAppend(const Command &cmd)
     return Status::Ok("Key created with value " + valueToString(cmd.getValue()));
 }
 
+Status Database::handleRename(const Command &cmd)
+{
+    std::string oldKey = cmd.getKey();
+    std::string newKey = valueToString(cmd.getValue());
+    if (data.find(oldKey) != data.end())
+    {
+        data[newKey] = data[oldKey];
+        data.erase(oldKey);
+        Logger::getInstance().log("RENAME " + oldKey + " to " + newKey);
+        return Status::Ok("Key renamed");
+    }
+    return Status::Error("Old key does not exist");
+}
+
 Status Database::handleClear(const Command &cmd)
 {
     data.clear();
@@ -230,7 +244,7 @@ Status Database::handleClear(const Command &cmd)
 
 Status Database::handleHelp(const Command &cmd)
 {
-    return Status::Ok("Commands: SET key value | GET key | DEL key | COUNT | LIST | TYPE key | EXISTS key | CLEAR | SEARCH key | INCR key | DECR key | INCRBY key value | DECRBY key value | HELP | EXIT");
+    return Status::Ok("Commands: SET key value | GET key | DEL key | COUNT | LIST | TYPE key | EXISTS key | CLEAR | SEARCH key | INCR key | DECR key | INCRBY key value | DECRBY key value | RENAME oldkey newkey | HELP | EXIT");
 }
 
 Status Database::execute(const Command &cmd)
@@ -271,6 +285,8 @@ Status Database::execute(const Command &cmd)
         return handleDecrBy(cmd);
     case CommandType::APPEND:
         return handleAppend(cmd);
+    case CommandType::RENAME:
+        return handleRename(cmd);
     case CommandType::CLEAR:
         return handleClear(cmd);
     case CommandType::HELP:

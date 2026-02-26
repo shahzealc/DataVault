@@ -22,6 +22,7 @@ enum CommandType
     INCRBY,
     DECRBY,
     APPEND,
+    RENAME,
     EXIT,
 };
 

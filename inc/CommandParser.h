@@ -23,6 +23,7 @@ private:
     void parseIncrBy(std::istringstream &iss, Command &cmd);
     void parseDecrBy(std::istringstream &iss, Command &cmd);
     void parseAppend(std::istringstream &iss, Command &cmd);
+    void parseRename(std::istringstream &iss, Command &cmd);
 };
 
 // Helper function to detect and convert value type
